@@ -1,0 +1,4 @@
+# A simple time series server
+
+build with [gb](https://getgb.io/) `gb build all`
+

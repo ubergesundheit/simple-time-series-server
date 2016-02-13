@@ -1,0 +1,18 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/ant0ine/go-json-rest/rest",
+			"repository": "https://github.com/ant0ine/go-json-rest",
+			"revision": "37ad7dc626602a8355801da6acd85155655520f8",
+			"branch": "master",
+			"path": "/rest"
+		},
+		{
+			"importpath": "github.com/mattn/go-sqlite3",
+			"repository": "https://github.com/mattn/go-sqlite3",
+			"revision": "c5aee9649735e8dadac55eb968ccebd9fa29a881",
+			"branch": "master"
+		}
+	]
+}

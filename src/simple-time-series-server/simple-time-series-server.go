@@ -62,7 +62,10 @@ func (i *Impl) InitDB() {
 
 func (i *Impl) GetLatest(w rest.ResponseWriter, r *rest.Request) {
 	rows, err := i.DB.Query(SELECT_LATEST)
-	checkErr(err)
+	if err != nil {
+		rest.Error(w, err.Error(), 400)
+		return
+	}
 	var response []Entry
 
 	for rows.Next() {
@@ -71,9 +74,15 @@ func (i *Impl) GetLatest(w rest.ResponseWriter, r *rest.Request) {
 		var blobdata []uint8
 		var data map[string]interface{}
 		err = rows.Scan(&collection, &timestamp, &blobdata)
-		checkErr(err)
+		if err != nil {
+			rest.Error(w, err.Error(), 400)
+			return
+		}
 		err := json.Unmarshal(blobdata, &data)
-		checkErr(err)
+		if err != nil {
+			rest.Error(w, err.Error(), 400)
+			return
+		}
 		response = append(response, Entry{
 			Collection: collection,
 			Timestamp:  time.Unix(timestamp, 0).UTC(),
@@ -101,21 +110,34 @@ func (i *Impl) CreateEntry(w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	if len(newEntry.Data) == 0 {
-		rest.Error(w, "data 1!", 400)
+		rest.Error(w, "data must be not empty", 400)
 		return
-
 	}
 
 	jsonData, err := json.Marshal(newEntry.Data)
-	checkErr(err)
+	if err != nil {
+		rest.Error(w, err.Error(), 400)
+		return
+	}
 
 	stmt, err := i.DB.Prepare(INSERT_INTO)
-	checkErr(err)
+	if err != nil {
+		rest.Error(w, err.Error(), 400)
+		return
+	}
+
 	res, err := stmt.Exec(newEntry.Collection, newEntry.Timestamp.UTC().Unix(), jsonData)
-	checkErr(err)
+	if err != nil {
+		rest.Error(w, err.Error(), 400)
+		return
+	}
 
 	_, err = res.LastInsertId()
-	checkErr(err)
+	if err != nil {
+		rest.Error(w, err.Error(), 400)
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
 }
 

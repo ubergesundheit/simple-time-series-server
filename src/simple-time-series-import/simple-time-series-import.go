@@ -29,14 +29,10 @@ func main() {
 	checkErr(err)
 
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS entries (collection TEXT, timestamp INTEGER, data BLOB);")
-	if err != nil {
-		fmt.Println("table alreay existing")
-	}
+	checkErr(err)
 
 	_, err = db.Exec("CREATE INDEX IF NOT EXISTS index_collection ON entries (collection);")
-	if err != nil {
-		fmt.Println("index alreay existing")
-	}
+	checkErr(err)
 
 	_, err = db.Exec("PRAGMA locking_mode = EXCLUSIVE;PRAGMA synchronous = OFF;PRAGMA journal_mode = OFF;")
 	checkErr(err)
@@ -63,6 +59,7 @@ func main() {
 
 func checkErr(err error) {
 	if err != nil {
+		fmt.Println(err.Error())
 		panic(err)
 	}
 }

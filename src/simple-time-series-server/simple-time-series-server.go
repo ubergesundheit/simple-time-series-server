@@ -86,6 +86,7 @@ func (app *App) GetLatestFromDB() ([]Entry, error) {
 	if err != nil {
 		return []Entry{}, err
 	}
+	defer rows.Close()
 
 	var entries []Entry
 	for rows.Next() {
@@ -106,6 +107,13 @@ func (app *App) GetLatestFromDB() ([]Entry, error) {
 			Timestamp:  time.Unix(timestamp, 0).UTC(),
 			Data:       data,
 		})
+	}
+	if err = rows.Close(); err != nil {
+		return []Entry{}, err
+	}
+	err = rows.Err()
+	if err != nil {
+		return []Entry{}, err
 	}
 	return entries, nil
 }

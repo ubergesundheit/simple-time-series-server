@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,33 +12,16 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var SQL_STATEMENTS = map[string]string{
-	"SELECT_LATEST":           "SELECT `collection`, MAX(`timestamp`) as timestamp, `data` FROM `entries` GROUP BY collection;",
-	"INSERT_INTO":             "INSERT INTO `entries` (collection, timestamp, data) VALUES (?, ?, ?);",
-	"CREATE_TABLE":            "CREATE TABLE IF NOT EXISTS entries (collection TEXT, timestamp INTEGER, data BLOB);",
-	"CREATE_INDEX_COLLECTION": "CREATE INDEX IF NOT EXISTS index_collection ON entries (collection);",
-	"PRAGMAS":                 "PRAGMA locking_mode = EXCLUSIVE;PRAGMA synchronous = OFF;PRAGMA journal_mode = OFF;",
-}
-
 type App struct {
 	DB *sql.DB
 }
 
-type Entry struct {
-	Collection string                 `json:"collection"`
-	Timestamp  time.Time              `json:"timestamp"`
-	Data       map[string]interface{} `json:"data"`
-}
-
-type InsertableEntry struct {
-	Collection string
-	Timestamp  int64
-	Data       []byte
-}
-
 func main() {
+	// flag handling
+	handleFlags()
+
 	app := App{}
-	app.StartServer(":8080", "./simple-time-series-db.sqlite")
+	app.StartServer(address, filename)
 	defer app.DB.Close()
 }
 
@@ -71,18 +53,20 @@ func (app *App) InitDB(dbFileName string) {
 	app.DB, err = sql.Open("sqlite3", dbFileName)
 	checkErr(err)
 
-	_, err = app.DB.Exec(SQL_STATEMENTS["CREATE_TABLE"])
+	_, err = app.DB.Exec(CREATE_TABLE)
 	checkErr(err)
 
-	_, err = app.DB.Exec(SQL_STATEMENTS["CREATE_INDEX_COLLECTION"])
+	_, err = app.DB.Exec(CREATE_INDEX_COLLECTION)
 	checkErr(err)
 
-	_, err = app.DB.Exec(SQL_STATEMENTS["PRAGMAS"])
-	checkErr(err)
+	if safeMode == false {
+		_, err = app.DB.Exec(PRAGMAS)
+		checkErr(err)
+	}
 }
 
 func (app *App) GetLatestFromDB() ([]Entry, error) {
-	rows, err := app.DB.Query(SQL_STATEMENTS["SELECT_LATEST"])
+	rows, err := app.DB.Query(SELECT_LATEST)
 	if err != nil {
 		return []Entry{}, err
 	}
@@ -154,7 +138,7 @@ func (app *App) CreateEntryInDB(entry Entry) error {
 		return err
 	}
 
-	stmt, err := app.DB.Prepare(SQL_STATEMENTS["INSERT_INTO"])
+	stmt, err := app.DB.Prepare(INSERT_INTO)
 	if err != nil {
 		return err
 	}
@@ -169,25 +153,6 @@ func (app *App) CreateEntryInDB(entry Entry) error {
 		return err
 	}
 	return nil
-}
-
-func ValidateAndConvertEntry(e Entry) (InsertableEntry, error) {
-	if len(e.Collection) == 0 || e.Timestamp.IsZero() == true || len(e.Data) == 0 {
-		return InsertableEntry{}, errors.New("fields `collection`, `timestamp` and `data` are required and must be non-empty")
-	}
-
-	jsonData, err := json.Marshal(e.Data)
-	if err != nil {
-		return InsertableEntry{}, err
-	}
-
-	ie := InsertableEntry{
-		Collection: e.Collection,
-		Timestamp:  e.Timestamp.UTC().Unix(),
-		Data:       jsonData,
-	}
-
-	return ie, nil
 }
 
 func checkErr(err error) {

@@ -5,18 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Entry struct {
-	Collection string      `json:"collection"`
-	Timestamp  time.Time   `json:"timestamp"`
-	Data       interface{} `json:"data"`
-}
-
-func main() {
+func (app *App) Import() {
 	file, e := ioutil.ReadFile("./all")
 	if e != nil {
 		fmt.Printf("File error: %v\n", e)
@@ -55,11 +48,4 @@ func main() {
 	checkErr(err)
 
 	db.Close()
-}
-
-func checkErr(err error) {
-	if err != nil {
-		fmt.Println(err.Error())
-		panic(err)
-	}
 }

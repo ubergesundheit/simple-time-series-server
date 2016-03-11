@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,8 +8,9 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func (app *App) Import() {
-	file, e := ioutil.ReadFile("./all")
+func (app *App) Import(dbFilename string, importFilename string) {
+	fmt.Println("reading file `", importFilename, "` for import")
+	file, e := ioutil.ReadFile(importFilename)
 	if e != nil {
 		fmt.Printf("File error: %v\n", e)
 	}
@@ -18,34 +18,20 @@ func (app *App) Import() {
 	var entries []Entry
 	json.Unmarshal(file, &entries)
 
-	db, err := sql.Open("sqlite3", "./simple-time-series-db.sqlite")
-	checkErr(err)
+	fmt.Println("found", len(entries), "entries, begin import")
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS entries (collection TEXT, timestamp INTEGER, data BLOB);")
-	checkErr(err)
+	app.InitDB(dbFilename)
 
-	_, err = db.Exec("CREATE INDEX IF NOT EXISTS index_collection ON entries (collection);")
-	checkErr(err)
-
-	_, err = db.Exec("PRAGMA locking_mode = EXCLUSIVE;PRAGMA synchronous = OFF;PRAGMA journal_mode = OFF;")
-	checkErr(err)
-
-	_, err = db.Exec("BEGIN TRANSACTION;")
+	_, err := app.DB.Exec("BEGIN TRANSACTION;")
 	checkErr(err)
 
 	for _, entry := range entries {
-		jsonbytes, err := json.Marshal(entry.Data)
-		checkErr(err)
-
-		stmt, err := db.Prepare("INSERT INTO `entries` (collection, timestamp, data) VALUES (?, ?, ?);")
-		checkErr(err)
-
-		_, err = stmt.Exec(entry.Collection, entry.Timestamp.UTC().Unix(), jsonbytes)
-		checkErr(err)
+		app.CreateEntryInDB(entry)
 	}
+	fmt.Println("imported", len(entries), "entries from `", importFilename, "` to `", dbFilename, "`")
 
-	_, err = db.Exec("COMMIT TRANSACTION;")
+	_, err = app.DB.Exec("COMMIT TRANSACTION;")
 	checkErr(err)
 
-	db.Close()
+	app.DB.Close()
 }

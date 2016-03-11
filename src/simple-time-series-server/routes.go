@@ -15,7 +15,12 @@ func (app *App) GetLatest(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	w.WriteJson(response)
+	if len(response) != 0 {
+		w.WriteJson(response)
+	} else {
+		w.WriteJson([]string{})
+	}
+
 }
 
 func (app *App) PostEntry(w rest.ResponseWriter, r *rest.Request) {

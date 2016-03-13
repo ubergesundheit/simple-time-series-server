@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
 	"log"
@@ -9,10 +8,11 @@ import (
 	"os"
 
 	"github.com/ant0ine/go-json-rest/rest"
+	"github.com/boltdb/bolt"
 )
 
 type App struct {
-	DB *sql.DB
+	DB *bolt.DB
 }
 
 func main() {

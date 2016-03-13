@@ -13,8 +13,8 @@ type Entry struct {
 }
 
 type InsertableEntry struct {
-	Collection string
-	Timestamp  int64
+	Collection []byte
+	Timestamp  []byte
 	Data       []byte
 }
 
@@ -28,9 +28,14 @@ func ValidateAndConvertEntry(e Entry) (InsertableEntry, error) {
 		return InsertableEntry{}, err
 	}
 
+	timeText, err := e.Timestamp.UTC().MarshalText()
+	if err != nil {
+		return InsertableEntry{}, err
+	}
+
 	ie := InsertableEntry{
-		Collection: e.Collection,
-		Timestamp:  e.Timestamp.UTC().Unix(),
+		Collection: []byte(e.Collection),
+		Timestamp:  timeText,
 		Data:       jsonData,
 	}
 

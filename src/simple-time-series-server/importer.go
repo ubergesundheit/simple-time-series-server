@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func (app *App) Import(dbFilename string, importFilename string) {
@@ -22,16 +20,25 @@ func (app *App) Import(dbFilename string, importFilename string) {
 
 	app.InitDB(dbFilename)
 
-	_, err := app.DB.Exec("BEGIN TRANSACTION;")
+	tx, err := app.DB.Begin(true)
 	checkErr(err)
+	defer tx.Rollback()
 
 	for _, entry := range entries {
-		app.CreateEntryInDB(entry)
+		insertableEntry, err := ValidateAndConvertEntry(entry)
+		checkErr(err)
+		b, err := tx.CreateBucketIfNotExists([]byte(insertableEntry.Collection))
+		checkErr(err)
+		b.Put(insertableEntry.Timestamp, insertableEntry.Data)
+		checkErr(err)
 	}
-	fmt.Println("imported", len(entries), "entries from `", importFilename, "` to `", dbFilename, "`")
 
-	_, err = app.DB.Exec("COMMIT TRANSACTION;")
-	checkErr(err)
+	// Commit the transaction and check for error.
+	if err := tx.Commit(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("imported", len(entries), "entries from `", importFilename, "` to `", dbFilename, "`")
 
 	app.DB.Close()
 }

@@ -1,73 +1,52 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/boltdb/bolt"
 )
 
 func (app *App) InitDB(dbFileName string) error {
 	var err error
-	app.DB, err = sql.Open("sqlite3", dbFileName)
+	app.DB, err = bolt.Open(dbFileName, 0600, nil)
 	if err != nil {
 		return err
 	}
 
-	_, err = app.DB.Exec(CREATE_TABLE)
-	if err != nil {
-		return err
-	}
-
-	_, err = app.DB.Exec(CREATE_INDEX_COLLECTION)
-	if err != nil {
-		return err
-	}
-
-	if SafeMode == false {
-		_, err = app.DB.Exec(PRAGMAS)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
 func (app *App) GetLatestFromDB() ([]Entry, error) {
-	rows, err := app.DB.Query(SELECT_LATEST)
-	if err != nil {
-		return []Entry{}, err
-	}
-	defer rows.Close()
-
 	var entries []Entry
-	for rows.Next() {
-		var timestamp int64
-		var collection string
-		var blobdata []uint8
-		var data map[string]interface{}
-		err = rows.Scan(&collection, &timestamp, &blobdata)
-		if err != nil {
-			return []Entry{}, err
-		}
-		err := json.Unmarshal(blobdata, &data)
-		if err != nil {
-			return []Entry{}, err
-		}
-		entries = append(entries, Entry{
-			Collection: collection,
-			Timestamp:  time.Unix(timestamp, 0).UTC(),
-			Data:       data,
+	err := app.DB.View(func(tx *bolt.Tx) error {
+		return tx.ForEach(func(name []byte, bucket *bolt.Bucket) error {
+			cursor := bucket.Cursor()
+
+			timestamp, rawdata := cursor.Last()
+
+			var data map[string]interface{}
+			err := json.Unmarshal(rawdata, &data)
+			if err != nil {
+				return err
+			}
+			parsedTime, err := time.Parse(time.RFC3339, string(timestamp))
+			if err != nil {
+				return err
+			}
+			entries = append(entries, Entry{
+				Collection: string(name),
+				Timestamp:  parsedTime,
+				Data:       data,
+			})
+
+			return nil
 		})
-	}
-	if err = rows.Close(); err != nil {
-		return []Entry{}, err
-	}
-	err = rows.Err()
+	})
 	if err != nil {
 		return []Entry{}, err
 	}
+
 	return entries, nil
 }
 
@@ -76,20 +55,16 @@ func (app *App) CreateEntryInDB(entry Entry) error {
 	if err != nil {
 		return err
 	}
-
-	stmt, err := app.DB.Prepare(INSERT_INTO)
+	err = app.DB.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte(insertableEntry.Collection))
+		if err != nil {
+			return err
+		}
+		return b.Put(insertableEntry.Timestamp, insertableEntry.Data)
+	})
 	if err != nil {
 		return err
 	}
 
-	res, err := stmt.Exec(insertableEntry.Collection, insertableEntry.Timestamp, insertableEntry.Data)
-	if err != nil {
-		return err
-	}
-
-	_, err = res.LastInsertId()
-	if err != nil {
-		return err
-	}
 	return nil
 }

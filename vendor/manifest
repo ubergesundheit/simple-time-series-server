@@ -9,9 +9,9 @@
 			"path": "/rest"
 		},
 		{
-			"importpath": "github.com/mattn/go-sqlite3",
-			"repository": "https://github.com/mattn/go-sqlite3",
-			"revision": "10876d7dac65f02064c03d7372a2f1dfb90043fe",
+			"importpath": "github.com/boltdb/bolt",
+			"repository": "https://github.com/boltdb/bolt",
+			"revision": "0fd4c0547d204c7b1cad6db6f3adad5f2cf453e5",
 			"branch": "master"
 		}
 	]

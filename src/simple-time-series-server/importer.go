@@ -4,9 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 )
 
 func (app *App) Import(dbFilename string, importFilename string) {
+	if DropDB == true {
+		fmt.Println("Removing db file`", dbFilename, "`")
+		os.Remove(dbFilename)
+	} else {
+		fmt.Println("Going to append to db `", dbFilename, "`")
+	}
+
 	fmt.Println("reading file `", importFilename, "` for import")
 	file, e := ioutil.ReadFile(importFilename)
 	if e != nil {

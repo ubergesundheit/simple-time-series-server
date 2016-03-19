@@ -13,6 +13,12 @@
 			"repository": "https://github.com/boltdb/bolt",
 			"revision": "0fd4c0547d204c7b1cad6db6f3adad5f2cf453e5",
 			"branch": "master"
+		},
+		{
+			"importpath": "github.com/dgrijalva/jwt-go",
+			"repository": "https://github.com/dgrijalva/jwt-go",
+			"revision": "9a4b9f2ac1f7685147a5c01544e3b922dbc1f4a0",
+			"branch": "master"
 		}
 	]
 }

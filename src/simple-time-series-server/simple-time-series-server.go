@@ -49,6 +49,7 @@ func (app *App) StartServer(addr string, dbFileName string) {
 	router, err := rest.MakeRouter(
 		rest.Get("/latest", app.GetLatest),
 		rest.Post("/postEntry", app.PostEntry),
+		rest.Post("/postSignedEntry", app.PostJwtEntry),
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -66,13 +66,16 @@ func parseSecrets(secrets map[string][]byte) error {
 	// read lines and split them by the equal sign (=)
 	linenum := 1
 	for scanner.Scan() {
-		keyValue := strings.SplitN(scanner.Text(), "=", 2)
-		if len(keyValue) != 2 || len(keyValue[0]) == 0 || len(keyValue[1]) == 0 {
-			return MalformedSecretsFileError(linenum, "")
-		} else if len(secrets[keyValue[0]]) != 0 {
-			return MalformedSecretsFileError(linenum, "duplicate key")
-		} else {
-			secrets[keyValue[0]] = []byte(keyValue[1])
+		line := scanner.Text()
+		if len(line) != 0 { // ignore empty lines
+			keyValue := strings.SplitN(line, "=", 2)
+			if len(keyValue) != 2 || len(keyValue[0]) == 0 || len(keyValue[1]) == 0 {
+				return MalformedSecretsFileError(linenum, "")
+			} else if len(secrets[keyValue[0]]) != 0 {
+				return MalformedSecretsFileError(linenum, "duplicate key")
+			} else {
+				secrets[keyValue[0]] = []byte(keyValue[1])
+			}
 		}
 		linenum += 1
 	}

@@ -2,3 +2,4 @@
 *.db
 bin
 pkg
+simple-time-series-secrets

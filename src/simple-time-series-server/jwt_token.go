@@ -11,13 +11,24 @@ var (
 	MissingCollectionError = errors.New("Key `collection` must be present and non empty")
 	MissingTimestampError  = errors.New("Key `timestamp` must be present and non empty")
 	MissingDataError       = errors.New("Key `data` must be present and non empty")
-
-	SECRET = []byte("marmelade")
 )
 
 func ParseJwt(rawJwt string) (Entry, error) {
+	createdAt, err := time.Now().UTC().MarshalText()
+	if err != nil {
+		return Entry{}, err
+	}
 	token, err := jwt.Parse(rawJwt, func(token *jwt.Token) (interface{}, error) {
-		return SECRET, nil
+		if collection, ok := token.Claims["collection"]; ok {
+			if collectionStr, ok := collection.(string); ok {
+				return CollectionSecrets[collectionStr], nil
+			} else {
+				return 0, MissingCollectionError
+			}
+		} else {
+			return 0, MissingCollectionError
+		}
+
 	})
 	if err != nil {
 		return Entry{}, err
@@ -53,6 +64,7 @@ func ParseJwt(rawJwt string) (Entry, error) {
 			}
 
 			newJwtEntry.Data = data
+			newJwtEntry.Data["createdAt"] = string(createdAt)
 		} else {
 			return Entry{}, MissingDataError
 		}

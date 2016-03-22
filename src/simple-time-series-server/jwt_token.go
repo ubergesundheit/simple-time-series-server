@@ -11,6 +11,8 @@ var (
 	MissingCollectionError = errors.New("Key `collection` must be present and non empty")
 	MissingTimestampError  = errors.New("Key `timestamp` must be present and non empty")
 	MissingDataError       = errors.New("Key `data` must be present and non empty")
+
+	UnexpectedSigningMethodError = errors.New("Unexpected signing method")
 )
 
 func ParseJwt(rawJwt string) (Entry, error) {
@@ -19,6 +21,10 @@ func ParseJwt(rawJwt string) (Entry, error) {
 		return Entry{}, err
 	}
 	token, err := jwt.Parse(rawJwt, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, UnexpectedSigningMethodError
+		}
+
 		if collection, ok := token.Claims["collection"]; ok {
 			if collectionStr, ok := collection.(string); ok {
 				return CollectionSecrets[collectionStr], nil

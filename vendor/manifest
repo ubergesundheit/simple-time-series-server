@@ -17,7 +17,7 @@
 		{
 			"importpath": "github.com/dgrijalva/jwt-go",
 			"repository": "https://github.com/dgrijalva/jwt-go",
-			"revision": "b446e078d613dc395bf50b08884acbeafb19ce50",
+			"revision": "a2c85815a77d0f951e33ba4db5ae93629a1530af",
 			"branch": "master"
 		}
 	]

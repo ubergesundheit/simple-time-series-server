@@ -3,3 +3,4 @@
 bin
 pkg
 simple-time-series-secrets
+secrets.yml

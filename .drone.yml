@@ -1,0 +1,18 @@
+build:
+  image: golang:1.6
+  pull: true
+  environment:
+    - CGO_ENABLED=0
+  commands:
+    - go get github.com/constabulary/gb/...
+    - gb test all -v
+    - gb build all
+
+publish:
+  docker:
+    username: $$DOCKER_USER
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: ubergesundheit/simple-time-series-server
+    tag: latest
+

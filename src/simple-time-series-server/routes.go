@@ -50,6 +50,28 @@ func (app *App) GetLast(w rest.ResponseWriter, r *rest.Request) {
 	}
 }
 
+func (app *App) GetAll(w rest.ResponseWriter, r *rest.Request) {
+	parameters := r.URL.Query()
+	collections := ""
+
+	if parameters["collections"] != nil {
+		collections = parameters["collections"][0]
+	}
+
+	response, err := app.GetAllFromDB(collections)
+	if err != nil {
+		fmt.Println(err.Error())
+		rest.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(response) != 0 {
+		w.WriteJson(response)
+	} else {
+		w.WriteJson([]string{})
+	}
+}
+
 func (app *App) GetLatest(w rest.ResponseWriter, r *rest.Request) {
 	response, err := app.GetLatestFromDB()
 	if err != nil {

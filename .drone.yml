@@ -6,7 +6,7 @@ build:
   commands:
     - go get github.com/constabulary/gb/...
     - gb test all -v
-    - gb build all
+    - gb build -ldflags '-s -w' all
 
 publish:
   docker:

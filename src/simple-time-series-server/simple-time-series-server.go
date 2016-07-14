@@ -59,9 +59,3 @@ func (app *App) StartServer(addr string, dbFileName string) {
 	api.SetApp(router)
 	log.Fatal(http.ListenAndServe(addr, api.MakeHandler()))
 }
-
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
-}

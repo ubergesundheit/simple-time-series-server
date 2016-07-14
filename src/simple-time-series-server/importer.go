@@ -50,3 +50,9 @@ func (app *App) Import(dbFilename string, importFilename string) {
 
 	app.DB.Close()
 }
+
+func checkErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}

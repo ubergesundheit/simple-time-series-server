@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -107,31 +106,31 @@ func (app *App) PostEntry(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (app *App) PostJwtEntry(w rest.ResponseWriter, r *rest.Request) {
-	content, err := ioutil.ReadAll(r.Body)
-	r.Body.Close()
-	if err != nil {
-		fmt.Println(err.Error())
-		rest.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	if len(content) == 0 {
-		fmt.Println(err.Error())
-		rest.Error(w, BodyIsEmptyError, http.StatusInternalServerError)
-	}
+//func (app *App) PostJwtEntry(w rest.ResponseWriter, r *rest.Request) {
+//	content, err := ioutil.ReadAll(r.Body)
+//	r.Body.Close()
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		rest.Error(w, err.Error(), http.StatusInternalServerError)
+//	}
+//	if len(content) == 0 {
+//		fmt.Println(err.Error())
+//		rest.Error(w, BodyIsEmptyError, http.StatusInternalServerError)
+//	}
 
-	parsedEntry, err := ParseJwt(string(content))
-	if err != nil {
-		fmt.Println(err.Error())
-		rest.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+//	parsedEntry, err := ParseJwt(string(content))
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		rest.Error(w, err.Error(), http.StatusInternalServerError)
+//		return
+//	}
 
-	err = app.CreateEntryInDB(parsedEntry)
-	if err != nil {
-		fmt.Println(err.Error())
-		rest.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+//	err = app.CreateEntryInDB(parsedEntry)
+//	if err != nil {
+//		fmt.Println(err.Error())
+//		rest.Error(w, err.Error(), http.StatusBadRequest)
+//		return
+//	}
 
-	w.WriteHeader(http.StatusCreated)
-}
+//	w.WriteHeader(http.StatusCreated)
+//}

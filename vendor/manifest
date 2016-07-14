@@ -4,20 +4,14 @@
 		{
 			"importpath": "github.com/ant0ine/go-json-rest/rest",
 			"repository": "https://github.com/ant0ine/go-json-rest",
-			"revision": "0b89f68216f29f0fdb2ef236c2168e3c817d5884",
+			"revision": "3a807d6d8d36e0f9175d6c292030fce09bcbb2db",
 			"branch": "master",
 			"path": "/rest"
 		},
 		{
 			"importpath": "github.com/boltdb/bolt",
 			"repository": "https://github.com/boltdb/bolt",
-			"revision": "144418e1475d8bf7abbdc48583500f1a20c62ea7",
-			"branch": "master"
-		},
-		{
-			"importpath": "github.com/dgrijalva/jwt-go",
-			"repository": "https://github.com/dgrijalva/jwt-go",
-			"revision": "a2c85815a77d0f951e33ba4db5ae93629a1530af",
+			"revision": "acc803f0ced151102ed51bf824f8709ebd6602bc",
 			"branch": "master"
 		}
 	]

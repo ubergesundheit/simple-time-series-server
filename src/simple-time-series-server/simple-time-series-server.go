@@ -51,7 +51,7 @@ func (app *App) StartServer(addr string, dbFileName string) {
 		rest.Get("/last", app.GetLast),
 		rest.Get("/all", app.GetAll),
 		rest.Post("/postEntry", app.PostEntry),
-		rest.Post("/postSignedEntry", app.PostJwtEntry),
+		//rest.Post("/postSignedEntry", app.PostJwtEntry),
 	)
 	if err != nil {
 		log.Fatal(err)

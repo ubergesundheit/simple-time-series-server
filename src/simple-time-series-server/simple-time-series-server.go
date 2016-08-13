@@ -42,9 +42,13 @@ func (app *App) StartServer(addr string, dbFileName string) {
 		RejectNonCorsRequests: false,
 		AllowedMethods:        []string{"GET", "POST"},
 		AllowedHeaders: []string{
-			"Accept", "Content-Type", "X-Custom-Header", "Origin"},
+			"Accept", "Content-Type", "Origin"},
 		AccessControlAllowCredentials: true,
 		AccessControlMaxAge:           2592000,
+
+		OriginValidator: func(origin string, request *rest.Request) bool {
+			return true
+		},
 	})
 	router, err := rest.MakeRouter(
 		rest.Get("/latest", app.GetLatest),
